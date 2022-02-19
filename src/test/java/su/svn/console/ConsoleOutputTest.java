@@ -5,28 +5,26 @@ import junit.framework.TestCase;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
-public class ConsoleErrorTest extends TestCase {
+public class ConsoleOutputTest extends TestCase {
 
-    static Class<ConsoleError> clazz;
+    static Class<ConsoleOutput> clazz;
 
-    ConsoleError consoleError;
+    ConsoleOutput consoleOutput;
 
-    ConsoleError mock;
+    ConsoleOutput mock;
+
 
     public void setUp() throws Exception {
         super.setUp();
+        clazz = ConsoleOutput.class;
 
-        clazz = ConsoleError.class;
-
-        Class<ConsoleError> c = ConsoleError.class;
-        Constructor<ConsoleError> constructor = c.getDeclaredConstructor();
+        Constructor<ConsoleOutput> constructor = clazz.getDeclaredConstructor();
         constructor.setAccessible(true);
-
         mock = constructor.newInstance();
 
-        Field consoleErrorField = c.getDeclaredField("consoleError");
-        consoleErrorField.setAccessible(true);
-        consoleErrorField.set(mock, null);
+        Field consoleOutputField = clazz.getDeclaredField("consoleOutput");
+        consoleOutputField.setAccessible(true);
+        consoleOutputField.set(mock, null);
     }
 
     public void testFields() throws ReflectiveOperationException {
@@ -38,33 +36,33 @@ public class ConsoleErrorTest extends TestCase {
         oldField.setAccessible(true);
         assertNotNull(oldField.get(mock));
 
-        Field consoleErrorField = clazz.getDeclaredField("consoleError");
+        Field consoleErrorField = clazz.getDeclaredField("consoleOutput");
         consoleErrorField.setAccessible(true);
         assertNull(consoleErrorField.get(mock));
     }
 
     public void testMethod_redirect() {
-        consoleError = ConsoleError.redirect();
+        consoleOutput = ConsoleOutput.redirect();
         //noinspection SimplifiableAssertion
-        assertTrue(consoleError == ConsoleError.redirect());
+        assertTrue(consoleOutput == ConsoleOutput.redirect());
     }
 
     public void testMethod_get() {
-        consoleError = ConsoleError.redirect();
-        assertEquals(consoleError, ConsoleError.get());
+        consoleOutput = ConsoleOutput.redirect();
+        assertEquals(consoleOutput, ConsoleOutput.get());
     }
 
     public void testMethod_toString() {
-        consoleError = ConsoleError.redirect();
-        System.err.print("test");
-        assertEquals("test", consoleError.toString());
+        consoleOutput = ConsoleOutput.redirect();
+        System.out.print("test");
+        assertEquals("test", consoleOutput.toString());
     }
 
     public void tearDown() throws Exception {
         super.tearDown();
-        if (ConsoleError.get() != null) {
-            ConsoleError.get().revertBack();
+        if (ConsoleOutput.get() != null) {
+            ConsoleOutput.get().revertBack();
         }
-        consoleError = null;
+        consoleOutput = null;
     }
 }

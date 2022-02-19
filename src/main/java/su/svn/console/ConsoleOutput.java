@@ -30,8 +30,10 @@ public final class ConsoleOutput {
 
     public void revertBack() {
         System.out.flush();
-        synchronized (old) {
-            System.setOut(old);
+        if (old != null) {
+            synchronized (old) {
+                System.setOut(old);
+            }
         }
     }
 

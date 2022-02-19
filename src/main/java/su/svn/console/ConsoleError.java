@@ -1,4 +1,4 @@
-package su.svn;
+package su.svn.console;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;

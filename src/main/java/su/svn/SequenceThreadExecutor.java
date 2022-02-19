@@ -1,22 +1,22 @@
 package su.svn;
 
-import net.jcip.examples.UnsafeSequence;
+import net.jcip.examples.Sequence;
 
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-final class UnsafeSequenceThreadExecutor {
+final class SequenceThreadExecutor {
 
     private static final int MAX_BOUND = 10;
     static final int MAX_SIZE = 10 * MAX_BOUND;
 
-    private static final UnsafeSequence unsafeSequence = new UnsafeSequence();
+    private static final Sequence safeSequence = new Sequence();
 
     private static final Runnable runnable = () -> {
         try {
             Thread.sleep(new Random().nextInt(MAX_BOUND));
-            final int next = unsafeSequence.getNext();
+            final int next = safeSequence.getNext();
             System.out.print(" " + next);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -25,7 +25,7 @@ final class UnsafeSequenceThreadExecutor {
 
     private final ExecutorService exec = Executors.newFixedThreadPool(MAX_SIZE);
 
-    private UnsafeSequenceThreadExecutor() {}
+    private SequenceThreadExecutor() {}
 
     private void go() throws Exception {
         for (int i = 0; i < MAX_SIZE; i++) {
@@ -36,6 +36,6 @@ final class UnsafeSequenceThreadExecutor {
     }
 
     static void race() throws Exception {
-        new UnsafeSequenceThreadExecutor().go();
+        new SequenceThreadExecutor().go();
     }
 }

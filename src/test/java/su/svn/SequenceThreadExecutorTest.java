@@ -1,6 +1,7 @@
 package su.svn;
 
 import junit.framework.TestCase;
+import org.junit.runner.OrderWith;
 import su.svn.console.ConsoleOutput;
 
 import java.lang.reflect.Constructor;
@@ -42,5 +43,12 @@ public class SequenceThreadExecutorTest extends TestCase {
         exec.execute((Runnable) runnableObject);
         exec.shutdownNow();
         assertTrue(exec.isShutdown());
+    }
+
+    public void tearDown() throws Exception {
+        super.tearDown();
+        if (ConsoleOutput.get() != null) {
+            ConsoleOutput.get().revertBack();
+        }
     }
 }

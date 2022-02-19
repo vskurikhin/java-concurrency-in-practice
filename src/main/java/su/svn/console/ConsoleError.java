@@ -30,8 +30,10 @@ public final class ConsoleError {
 
     public void revertBack() {
         System.err.flush();
-        synchronized (old) {
-            System.setErr(old);
+        if (old != null) {
+            synchronized (old) {
+                System.setErr(old);
+            }
         }
     }
 

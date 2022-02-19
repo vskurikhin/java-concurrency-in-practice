@@ -17,9 +17,7 @@ final class UnsafeSequenceThreadExecutor {
         try {
             Thread.sleep(new Random().nextInt(MAX_BOUND));
             final int next = unsafeSequence.getNext();
-            synchronized (System.out) {
-                System.out.print(" " + next);
-            }
+            System.out.print(" " + next);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }

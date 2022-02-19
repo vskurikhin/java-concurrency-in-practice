@@ -30,7 +30,9 @@ public final class ConsoleOutput {
 
     public void revertBack() {
         System.out.flush();
-        System.setOut(old);
+        synchronized (old) {
+            System.setOut(old);
+        }
     }
 
     public static ConsoleOutput get() {

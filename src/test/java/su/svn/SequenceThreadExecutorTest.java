@@ -1,6 +1,7 @@
 package su.svn;
 
 import junit.framework.TestCase;
+import su.svn.console.ConsoleOutput;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;

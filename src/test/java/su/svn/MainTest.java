@@ -52,6 +52,7 @@ public class MainTest {
         Main.main(new String[]{});
         List<Integer> result = Arrays.stream(ConsoleStub.get().toString().trim().split(" "))
                 .filter(Objects::nonNull)
+                .filter(s -> ! s.equals(""))
                 .map(Integer::parseInt)
                 .collect(Collectors.toList());
         assertEquals(CountingFactorizerExecutor.MAX_SIZE, result.size());

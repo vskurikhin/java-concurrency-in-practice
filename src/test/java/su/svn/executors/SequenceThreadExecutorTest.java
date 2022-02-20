@@ -1,13 +1,15 @@
-package su.svn;
+package su.svn.executors;
 
 import junit.framework.TestCase;
-import org.junit.runner.OrderWith;
+import org.junit.Ignore;
 import su.svn.console.ConsoleOutput;
+import su.svn.executors.SequenceThreadExecutor;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
 
+@Ignore
 public class SequenceThreadExecutorTest extends TestCase {
 
     ConsoleOutput consoleOutput;

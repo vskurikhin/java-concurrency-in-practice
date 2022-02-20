@@ -20,7 +20,7 @@ import static org.junit.Assert.*;
 public class MainTest {
 
 
-    public static int PAUSE = 1500;
+    public static int PAUSE = 5000;
 
     public static void clearEmbedded() throws Exception {
         Class<Embedded> clazz = Embedded.class;

@@ -1,4 +1,4 @@
-package su.svn;
+package su.svn.executors;
 
 import net.jcip.examples.Sequence;
 
@@ -17,7 +17,7 @@ final class SequenceThreadExecutor {
         try {
             Thread.sleep(new Random().nextInt(MAX_BOUND));
             final int next = safeSequence.getNext();
-            System.out.print(" " + next);
+            System.err.print(" " + next);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
@@ -35,7 +35,7 @@ final class SequenceThreadExecutor {
         exec.shutdownNow();
     }
 
-    static void race() throws Exception {
+    public static void race() throws Exception {
         new SequenceThreadExecutor().go();
     }
 }

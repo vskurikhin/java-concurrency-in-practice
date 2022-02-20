@@ -1,20 +1,29 @@
 package su.svn;
 
-import net.jcip.examples.StatelessFactorizer;
+import net.jcip.examples.UnsafeCountingFactorizer;
 import org.apache.catalina.LifecycleException;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.SLF4JConfigurer;
 
+import java.io.PrintStream;
+
 public final class Application {
+
+    private static Application application;
 
     private final Embedded tomcat;
 
+    private final PrintStream oldErr;
+
     public static Application create() {
-        return new Application();
+        if (application == null) {
+            application = new Application();
+        }
+        return application;
     }
 
     private Application() {
-
+        oldErr = System.err;
         SLF4JConfigurer.install();
         this.tomcat = Embedded.get();
 
@@ -29,7 +38,7 @@ public final class Application {
     }
 
     public void start() throws LifecycleException {
-        tomcat.start(new StatelessFactorizer());
+        tomcat.start(new UnsafeCountingFactorizer());
     }
 
     public void stop() throws LifecycleException {

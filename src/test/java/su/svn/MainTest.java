@@ -69,6 +69,6 @@ public class MainTest {
                 .build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         Assert.assertEquals(200, response.statusCode());
-        System.out.println(response.body());
+        System.err.println(response.body());
     }
 }

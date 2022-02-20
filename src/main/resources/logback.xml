@@ -15,7 +15,7 @@
         <encoder class="net.logstash.logback.encoder.LogstashEncoder" />
     </appender>
 
-    <root level="debug">
+    <root level="DEBUG">
         <appender-ref ref="COLOR" />
     </root>
 </configuration>

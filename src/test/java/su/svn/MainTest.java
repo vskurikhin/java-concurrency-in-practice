@@ -9,9 +9,11 @@ import su.svn.tomcat.Embedded;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -50,12 +52,24 @@ public class MainTest {
             }
         }).start();
         Main.main(new String[]{});
-        List<Integer> result = Arrays.stream(ConsoleStub.get().toString().trim().split(" "))
+        System.out.println("ConsoleStub.get().toString() = " + ConsoleStub.get().toString());
+        List<String> result = Arrays.stream(ConsoleStub.get().toString().trim().split("\n"))
                 .filter(Objects::nonNull)
+                .map(String::trim)
                 .filter(s -> ! s.equals(""))
-                .map(Integer::parseInt)
+                .map(MainTest::first)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
-        assertEquals(CountingFactorizerExecutor.MAX_SIZE, result.size());
-        assertTrue(result.contains(CountingFactorizerExecutor.MAX_SIZE));
+        System.out.println("result = " + result);
+        System.out.println("result.size() = " + result.size());
+    }
+
+    public static Optional<String> first(String s) {
+        String a[] = s.split(" ");
+        if (a.length > 0) {
+            return Optional.of(a[0]);
+        }
+        return Optional.empty();
     }
 }

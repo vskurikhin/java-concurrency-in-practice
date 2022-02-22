@@ -19,7 +19,7 @@ public class MainTest {
 
     private static final boolean TEST_VULNERABILITY_WINDOW = false;
 
-    public static int PAUSE = 5000;
+    public static int PAUSE = 15000;
 
     public static void clearEmbedded() throws Exception {
         Class<Embedded> clazz = Embedded.class;

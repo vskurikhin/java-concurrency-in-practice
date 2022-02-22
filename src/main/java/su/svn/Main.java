@@ -1,13 +1,7 @@
 package su.svn;
 
 import su.svn.console.ConsoleStub;
-import su.svn.executors.UnsafeCachingFactorizerExecutor;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import su.svn.executors.SynchronizedFactorizerExecutor;
 
 public class Main {
 
@@ -17,7 +11,7 @@ public class Main {
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
-                UnsafeCachingFactorizerExecutor.race();
+                SynchronizedFactorizerExecutor.race();
             } catch (Exception e) {
                 e.printStackTrace();
             }

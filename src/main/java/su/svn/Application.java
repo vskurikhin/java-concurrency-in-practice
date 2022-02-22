@@ -1,6 +1,6 @@
 package su.svn;
 
-import net.jcip.examples.UnsafeCachingFactorizer;
+import net.jcip.examples.SynchronizedFactorizer;
 import org.apache.catalina.LifecycleException;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.SLF4JConfigurer;
@@ -38,7 +38,7 @@ public final class Application {
     }
 
     public void start() throws LifecycleException {
-        tomcat.start(new UnsafeCachingFactorizer());
+        tomcat.start(new SynchronizedFactorizer());
     }
 
     public void stop() throws LifecycleException {

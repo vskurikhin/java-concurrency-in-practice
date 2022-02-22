@@ -5,8 +5,8 @@ import java.util.concurrent.Executors;
 
 public class UnsafeCachingFactorizerExecutor {
 
-    public static final int MAX_BOUND = 2;
-    public static final int MAX_SIZE = 3 * MAX_BOUND;
+    public static final int MAX_BOUND = 7;
+    public static final int MAX_SIZE = 9 * MAX_BOUND;
 
     private final ExecutorService exec = Executors.newFixedThreadPool(MAX_SIZE);
 

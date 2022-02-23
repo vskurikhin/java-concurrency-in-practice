@@ -20,7 +20,7 @@ class CachedFactorizerRunnable implements Runnable {
         String url = "http://localhost:8080/go?n=" + add().toString();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
-                .timeout(Duration.ofSeconds(120))
+                .timeout(Duration.ofSeconds(60 * CachedFactorizerExecutor.MAX_BOUND))
                 .expectContinue(false)
                 .GET()
                 .build();
@@ -28,6 +28,7 @@ class CachedFactorizerRunnable implements Runnable {
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofMillis(500))
                 .build();
+        Thread.sleep(100 + new Random().nextInt(750));
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         return response.body();
     }
@@ -42,6 +43,7 @@ class CachedFactorizerRunnable implements Runnable {
     public void run() {
         try {
             ConsoleStub.println(this.getNext());
+            CachedFactorizerExecutor.get().finish();
         } catch (Exception e) {
             Thread.currentThread().interrupt();
         }

@@ -24,7 +24,7 @@ public class OptionalCachedFactorizer extends GenericServlet implements Servlet 
 
     private static final long serialVersionUID = -3958427413779292492L;
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(UnsafeCachingFactorizer.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(OptionalCachedFactorizer.class);
 
     @GuardedBy("this") private BigInteger lastNumber;
     @GuardedBy("this") private BigInteger[] lastFactors;
@@ -61,9 +61,9 @@ public class OptionalCachedFactorizer extends GenericServlet implements Servlet 
 
     void encodeIntoResponse(ServletResponse resp, BigInteger[] factors) throws IOException {
         String lastFactors = Arrays.toString(factors);
-        LOGGER.debug(" " + this.lastNumber + " " + lastFactors);
+        LOGGER.debug(" " + this.lastNumber + " " + lastFactors + " hits: " + hits + " cacheHits: " + cacheHits);
         ServletOutputStream out = resp.getOutputStream();
-        out.println(this.lastNumber + " " + lastFactors + " hits: " + hits + " cacheHits: " + cacheHits);
+        out.println(this.lastNumber + " " + lastFactors);
         out.close();
     }
 

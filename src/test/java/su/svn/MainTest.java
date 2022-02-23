@@ -20,8 +20,6 @@ public class MainTest {
 
     private static final boolean TEST_VULNERABILITY_WINDOW = false;
 
-    public static int PAUSE = 20000;
-
     public static void clearEmbedded() throws Exception {
         Class<Embedded> clazz = Embedded.class;
 
@@ -43,7 +41,7 @@ public class MainTest {
     public void main() throws Exception {
         new Thread(() -> {
             try {
-                while ( ! CachedFactorizerExecutor.get().getFinished()) {
+                while ( ! CachedFactorizerExecutor.get().isFinished()) {
                     Thread.sleep(500);
                 }
                 Embedded.get().stop();

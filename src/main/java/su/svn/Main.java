@@ -1,10 +1,10 @@
 package su.svn;
 
-import net.jcip.examples.MutableInteger;
+import net.jcip.examples.SynchronizedInteger;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        MutableInteger mi = new MutableInteger();
+        SynchronizedInteger si = new SynchronizedInteger();
     }
 }

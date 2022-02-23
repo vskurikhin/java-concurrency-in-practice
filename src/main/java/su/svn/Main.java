@@ -1,12 +1,10 @@
 package su.svn;
 
-import net.jcip.examples.NoVisibility;
-import su.svn.console.ConsoleStub;
-import su.svn.executors.CachedFactorizerExecutor;
+import net.jcip.examples.MutableInteger;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        NoVisibility.main(args);
+        MutableInteger mi = new MutableInteger();
     }
 }

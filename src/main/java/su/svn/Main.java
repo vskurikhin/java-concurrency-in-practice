@@ -1,7 +1,7 @@
 package su.svn;
 
 import su.svn.console.ConsoleStub;
-import su.svn.executors.SynchronizedFactorizerExecutor;
+import su.svn.executors.CachedFactorizerExecutor;
 
 public class Main {
 
@@ -11,7 +11,7 @@ public class Main {
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
-                SynchronizedFactorizerExecutor.race();
+                CachedFactorizerExecutor.race();
             } catch (Exception e) {
                 e.printStackTrace();
             }

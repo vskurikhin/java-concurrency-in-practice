@@ -4,6 +4,7 @@ import org.apache.catalina.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
 import su.svn.console.ConsoleStub;
+import su.svn.executors.CachedFactorizerExecutor;
 import su.svn.tomcat.Embedded;
 
 import java.lang.reflect.Constructor;
@@ -18,8 +19,6 @@ import static org.junit.Assert.*;
 public class MainTest {
 
     private static final boolean TEST_VULNERABILITY_WINDOW = false;
-
-    public static int PAUSE = 15000;
 
     public static void clearEmbedded() throws Exception {
         Class<Embedded> clazz = Embedded.class;
@@ -42,7 +41,9 @@ public class MainTest {
     public void main() throws Exception {
         new Thread(() -> {
             try {
-                Thread.sleep(PAUSE);
+                while ( ! CachedFactorizerExecutor.get().isFinished()) {
+                    Thread.sleep(500);
+                }
                 Embedded.get().stop();
             } catch (InterruptedException | LifecycleException e) {
                 e.printStackTrace();
@@ -56,7 +57,6 @@ public class MainTest {
                 .filter(s -> !s.equals(""))
                 .map(MainTest::entry)
                 .map(MainTest::parseValue)
-                .peek(MainTest::printEntry)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, binaryOperator));
         System.out.println("result.size() = " + result.size());
     }
@@ -85,10 +85,6 @@ public class MainTest {
 
     private static Stream<String> parseValueAsArray(String s) {
         return null == s ? Stream.of() : Arrays.stream(s.split(","));
-    }
-
-    private static void printEntry(Map.Entry<String, String[]> stringEntry) {
-        System.out.printf("%s -> %s\n", stringEntry.getKey(), Arrays.toString(stringEntry.getValue()));
     }
 
     private static Map.Entry<String, Optional<String[]>> entry(String s) {

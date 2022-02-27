@@ -37,8 +37,11 @@ public class MainTest {
     public void main() throws Exception {
         new Thread(() -> {
             try {
-                while ( ! CachedFactorizerExecutor.get().isFinished()) {
+                int count = 0;
+                while ( ! CachedFactorizerExecutor.get().isFinished() && count < 120) {
+                    //noinspection BusyWait
                     Thread.sleep(500);
+                    count++;
                 }
                 Embedded.get().stop();
             } catch (InterruptedException | LifecycleException e) {

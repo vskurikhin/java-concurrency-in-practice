@@ -9,8 +9,8 @@ import java.util.concurrent.Executors;
 @ThreadSafe
 public class CachedFactorizerExecutor {
 
-    public static final int MAX_BOUND = 13;
-    public static final int MAX_SIZE = 11 * MAX_BOUND;
+    public static final int MAX_BOUND = 11;
+    public static final int MAX_SIZE = 7 * MAX_BOUND;
 
     private static CachedFactorizerExecutor cachedFactorizerExecutor;
 

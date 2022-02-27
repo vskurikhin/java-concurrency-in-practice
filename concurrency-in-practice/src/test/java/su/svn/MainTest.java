@@ -6,15 +6,13 @@ package su.svn;
 import org.apache.catalina.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
-import su.svn.executors.CachedFactorizerExecutor;
+import su.svn.executors.FactorizerExecutor;
 import su.svn.tomcat.Embedded;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.function.BinaryOperator;
 
 public class MainTest {
-    private static final boolean TEST_VULNERABILITY_WINDOW = false;
 
     public static void clearEmbedded() throws Exception {
         Class<Embedded> clazz = Embedded.class;
@@ -35,14 +33,17 @@ public class MainTest {
 
     @Test
     public void main() throws Exception {
+        final int sleepBeforeStop = FactorizerExecutor.SLEEP_BEFORE_GET
+                + FactorizerExecutor.START_POINT * FactorizerExecutor.MAX_SIZE;
         new Thread(() -> {
             try {
                 int count = 0;
-                while ( ! CachedFactorizerExecutor.get().isFinished() && count < 120) {
+                while ( ! FactorizerExecutor.get().isFinished() && count < sleepBeforeStop) {
                     //noinspection BusyWait
-                    Thread.sleep(500);
+                    Thread.sleep(1);
                     count++;
                 }
+                System.err.println("is finished: " + FactorizerExecutor.get().isFinished());
                 Embedded.get().stop();
             } catch (InterruptedException | LifecycleException e) {
                 e.printStackTrace();

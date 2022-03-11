@@ -2,6 +2,7 @@ package su.svn;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
+import net.jcip.examples.Factorizer;
 import net.jcip.examples.OptionalCachedFactorizer;
 import org.apache.catalina.LifecycleException;
 import org.apache.catalina.servlets.DefaultServlet;
@@ -44,7 +45,7 @@ public class Application {
 
     public void start() throws LifecycleException {
         synchronized (this) {
-            tomcat.start(new OptionalCachedFactorizer());
+            tomcat.start(new Factorizer());
         }
     }
 

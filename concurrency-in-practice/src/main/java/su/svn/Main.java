@@ -4,7 +4,7 @@
 package su.svn;
 
 import su.svn.console.ConsoleStub;
-import su.svn.executors.CachedFactorizerExecutor;
+import su.svn.executors.FactorizerExecutor;
 
 public class Main {
     public static void main(String[] args) throws Exception {
@@ -12,7 +12,7 @@ public class Main {
         new Thread(() -> {
             try {
                 Thread.sleep(1000);
-                CachedFactorizerExecutor.race();
+                FactorizerExecutor.race();
             } catch (Exception e) {
                 e.printStackTrace();
             }

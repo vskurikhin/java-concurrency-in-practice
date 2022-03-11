@@ -7,19 +7,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @ThreadSafe
-public class CachedFactorizerExecutor {
+public class FactorizerExecutor {
 
-    public static final int MAX_BOUND = 11;
-    public static final int MAX_SIZE = 7 * MAX_BOUND;
+    public static final int MAX_BOUND = 31;
+    public static final int MAX_SIZE = 3 * MAX_BOUND;
 
-    private static CachedFactorizerExecutor cachedFactorizerExecutor;
+    public static final int START_POINT = 100;
+    public static final int SLEEP_BEFORE_GET = 5000;
+
+    private static FactorizerExecutor cachedFactorizerExecutor;
 
     private final ExecutorService exec = Executors.newFixedThreadPool(MAX_SIZE);
 
     @GuardedBy("this")
     private volatile int finished = 1;
 
-    private CachedFactorizerExecutor() {}
+    private FactorizerExecutor() {}
 
     public int getFinished() {
         synchronized (this) {
@@ -48,7 +51,7 @@ public class CachedFactorizerExecutor {
     private void go() throws Exception {
         for (int i = 0; i < MAX_SIZE; i++) {
             start();
-            exec.execute(new CachedFactorizerRunnable());
+            exec.execute(new FactorizerRunnable());
         }
         Thread.sleep(MAX_SIZE);
         exec.shutdown();
@@ -61,9 +64,9 @@ public class CachedFactorizerExecutor {
         get().go();
     }
 
-    public static CachedFactorizerExecutor get() {
+    public static FactorizerExecutor get() {
         if (cachedFactorizerExecutor == null) {
-            cachedFactorizerExecutor = new CachedFactorizerExecutor();
+            cachedFactorizerExecutor = new FactorizerExecutor();
         }
         return cachedFactorizerExecutor;
     }

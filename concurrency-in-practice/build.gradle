@@ -29,8 +29,10 @@ static def getEnv(key, defaultValue) {
 ext.libVers = [
         assertj_core                    : '3.22.0',
         cglib                           : '3.3.0',
+        jackson                         : '2.13.2',
         javax_servlet_api               : '4.0.1',
         jcip_annotations                : '1.0',
+        jstl                            : '1.2',
         jul_to_slf4j                    : '1.7.36',
         junit                           : '5.8.1',
         logback_classic                 : '1.2.10',
@@ -59,6 +61,10 @@ dependencies {
     // This dependency is used by the application.
     implementation "cglib:cglib:$libVers.cglib"
     implementation "ch.qos.logback:logback-classic:$libVers.logback_classic"
+    implementation "com.fasterxml.jackson.core:jackson-annotations:$libVers.jackson"
+    implementation "com.fasterxml.jackson.core:jackson-core:$libVers.jackson"
+    implementation "com.fasterxml.jackson.core:jackson-databind:$libVers.jackson"
+    implementation "jstl:jstl:$libVers.jstl"
     implementation "net.jcip:jcip-annotations:$libVers.jcip_annotations"
     implementation "org.apache.tomcat.embed:tomcat-embed-core:$libVers.tomcat_embed_core"
     implementation "org.reflections:reflections:$libVers.org_reflections"
@@ -82,6 +88,7 @@ shadowJar {
     archiveBaseName.set('application')
     archiveClassifier.set('')
     archiveVersion.set('')
+    mergeServiceFiles('META-INF/spring.*')
 }
 
 jar {
@@ -90,8 +97,3 @@ jar {
         attributes("Main-Class": application.mainClass)
     }
 }
-
-//tasks.named('test') {
-//    // Use JUnit Platform for unit tests.
-//    useJUnitPlatform()
-//}

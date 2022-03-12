@@ -5,35 +5,34 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
 @Configuration
-@EnableWebMvc
 @ComponentScan(basePackages = {"su.svn"})
+@Import({WebConfig.class})
 public class ApplicationConfig implements WebApplicationInitializer, ApplicationContextAware {
 
     @Override
     public void onStartup(ServletContext container) {
-        // Create the 'root' Spring application context
+        /// Создаём «root» контекст приложения Spring.
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         rootContext.register(ApplicationConfig.class);
+        rootContext.register(DispatcherConfig.class);
+        // rootContext.getEnvironment().setConversionService(new ApplicationConversionService());
 
-        // Manage the lifecycle of the root application context
+        // Управление жизненным циклом «root» контекста приложения.
         container.addListener(new ContextLoaderListener(rootContext));
 
-        // Create the dispatcher servlet's Spring application context
-        AnnotationConfigWebApplicationContext dispatcherContext = new AnnotationConfigWebApplicationContext();
-
-        // Register and map the dispatcher servlet
+        // Регистрируем и сопоставляем сервлет диспетчера.
         ServletRegistration.Dynamic dispatcher = container
-                .addServlet("dispatcher", new DispatcherServlet(dispatcherContext));
+                .addServlet("dispatcher", new DispatcherServlet(rootContext));
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/");
     }

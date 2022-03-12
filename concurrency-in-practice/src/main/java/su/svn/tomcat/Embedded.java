@@ -6,6 +6,7 @@ import org.apache.catalina.Server;
 import org.apache.catalina.WebResourceRoot;
 import org.apache.catalina.WebResourceSet;
 import org.apache.catalina.Wrapper;
+import org.apache.catalina.core.StandardContext;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.JarResourceSet;
@@ -44,7 +45,7 @@ public final class Embedded {
         this.tomcat.setPort(Environment.PORT);
 
         this.tomcat.setConnector(this.tomcat.getConnector());
-        // prevent register jsp servlet
+        // предотвратить регистрацию сервлета jsp
         this.tomcat.setAddDefaultWebXmlToWebapp(false);
 
         contextPath = ""; // root context
@@ -53,7 +54,7 @@ public final class Embedded {
         try {
             String docBase = new File(Environment.STATIC_DIR).getCanonicalPath();
             this.context = this.tomcat.addWebapp(contextPath, docBase);
-            StandardContextConfigurer.setUp(this.context);
+            standardContextConfigurer(this.context);
         } catch (IOException e) {
             LOGGER.error("StandardContext configuring", e);
         }
@@ -80,8 +81,19 @@ public final class Embedded {
         start();
     }
 
+    private void standardContextConfigurer(Context context) {
+        context.setAddWebinfClassesResources(true); // process /META-INF/resources for static
+
+        // fix Illegal reflective access by org.apache.catalina.loader.WebappClassLoaderBase
+        // https://github.com/spring-projects/spring-boot/issues/15101#issuecomment-437384942
+        StandardContext standardContext = (StandardContext) context;
+        standardContext.setClearReferencesObjectStreamClassCaches(false);
+        standardContext.setClearReferencesRmiTargets(false);
+        standardContext.setClearReferencesThreadLocals(false);
+    }
+
     private void defaultServletConfiguring() {
-        // Additions to make serving static work
+        // Для статической работы.
         final String defaultServletName = "default";
         Wrapper defaultServlet = context.createWrapper();
         defaultServlet.setName(defaultServletName);
@@ -89,15 +101,17 @@ public final class Embedded {
         defaultServlet.addInitParameter("debug", "0");
         defaultServlet.addInitParameter("listings", "false");
         defaultServlet.setLoadOnStartup(1);
+        // Otherwise the default location of a Spring DispatcherServlet cannot be set
+        defaultServlet.setOverridable(true);
         context.addChild(defaultServlet);
         context.addServletMappingDecoded("/", defaultServletName);
-        // display index.html on http://127.0.0.1:8080
+        // index.html on http://127.0.0.1:8080
         context.addWelcomeFile("index.html");
     }
 
     private void resourceRootConfiguring(WebResourceRoot webResourceRoot) {
 
-        // add itself jar with static resources (html) and annotated servlets
+        // Добавим сам jar со статическими ресурсами (html) и аннотированными сервлетами.
 
         String webAppMount = "/WEB-INF/classes";
         WebResourceSet webResourceSet;

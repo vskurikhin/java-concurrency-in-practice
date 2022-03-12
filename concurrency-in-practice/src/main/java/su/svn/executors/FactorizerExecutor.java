@@ -22,30 +22,23 @@ public class FactorizerExecutor {
     @GuardedBy("this")
     private volatile int finished = 1;
 
-    private FactorizerExecutor() {}
-
-    public int getFinished() {
-        synchronized (this) {
-            return finished;
-        }
+    private FactorizerExecutor() {
     }
 
-    public boolean isFinished() {
-        synchronized (this) {
-            return finished == 0;
-        }
+    public synchronized int getFinished() {
+        return finished;
     }
 
-    public void start() {
-        synchronized (this) {
-            finished++;
-        }
+    public synchronized boolean isFinished() {
+        return finished == 0;
     }
 
-    public void finish() {
-        synchronized (this) {
-            finished--;
-        }
+    public synchronized void start() {
+        finished++;
+    }
+
+    public synchronized void finish() {
+        finished--;
     }
 
     private void go() throws Exception {

@@ -18,7 +18,6 @@ public enum FactorizerExecutor {
     public static final int MAX_SIZE = 3 * MAX_BOUND;
 
     public static final int START_POINT = 100;
-    public static final int SLEEP_BEFORE_GET = 5000;
 
     @GuardedBy("this")
     private volatile int finished = 1;
@@ -46,7 +45,7 @@ public enum FactorizerExecutor {
             exec.execute(new FactorizerRunnable());
         }
         exec.shutdown();
-        if (exec.awaitTermination(Environment.PAUSE_BEFORE_WARMUP_IN_MS, TimeUnit.MILLISECONDS)) {
+        if (exec.awaitTermination(2L * Environment.PAUSE_BEFORE_WARMUP_IN_MS, TimeUnit.MILLISECONDS)) {
             LOGGER.debug("awaitTermination returned true");
         } else {
             LOGGER.error("awaitTermination returned false");

@@ -3,23 +3,31 @@
  */
 package su.svn;
 
-import org.apache.catalina.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
+import su.svn.enums.Environment;
 import su.svn.executors.FactorizerExecutor;
 import su.svn.tomcat.Embedded;
+import su.svn.utils.EnvironmentVariable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.Random;
 
-public class MainTest {
+public class MainIT {
+
+    private static final int RANDOM_PORT = 8008 + new Random().nextInt(992);
+
+    static {
+        EnvironmentVariable.inject("PORT", Integer.toString(RANDOM_PORT));
+    }
 
     public static void clearEmbedded() throws Exception {
         Class<Embedded> clazz = Embedded.class;
 
-        Constructor<Embedded> constructor = clazz.getDeclaredConstructor();
+        Constructor<Embedded> constructor = clazz.getDeclaredConstructor(String.class, int.class);
         constructor.setAccessible(true);
-        Embedded mock = constructor.newInstance();
+        Embedded mock = constructor.newInstance(Environment.HOSTNAME, RANDOM_PORT);
 
         Field consoleOutputField = clazz.getDeclaredField("embedded");
         consoleOutputField.setAccessible(true);
@@ -33,19 +41,18 @@ public class MainTest {
 
     @Test
     public void main() throws Exception {
-        final int sleepBeforeStop = FactorizerExecutor.SLEEP_BEFORE_GET
+        final int sleepBeforeStop = Environment.PAUSE_BEFORE_WARMUP_IN_MS
                 + FactorizerExecutor.START_POINT * FactorizerExecutor.MAX_SIZE;
         new Thread(() -> {
             try {
                 int count = 0;
-                while ( ! FactorizerExecutor.Singleton.isFinished() && count < sleepBeforeStop) {
+                while (!FactorizerExecutor.Singleton.isFinished() && count < sleepBeforeStop) {
                     //noinspection BusyWait
-                    Thread.sleep(1);
+                    Thread.sleep(10);
                     count++;
                 }
-                System.err.println("is finished: " + FactorizerExecutor.Singleton.isFinished());
                 Embedded.get().stop();
-            } catch (InterruptedException | LifecycleException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();

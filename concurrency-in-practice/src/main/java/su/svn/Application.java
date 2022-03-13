@@ -5,6 +5,7 @@ import net.jcip.annotations.ThreadSafe;
 import net.jcip.examples.Factorizer;
 import org.apache.catalina.LifecycleException;
 import org.springframework.context.ApplicationContext;
+import su.svn.enums.Environment;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.SLF4JConfigurer;
 
@@ -21,7 +22,7 @@ public enum Application {
 
     Application() {
         SLF4JConfigurer.install();
-        this.tomcat = Embedded.get();
+        this.tomcat = Embedded.createInstance(Environment.HOSTNAME, Environment.PORT);
 
         // нужно для правильной остановки сервлетов
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

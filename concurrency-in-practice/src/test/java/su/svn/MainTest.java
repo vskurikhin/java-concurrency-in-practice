@@ -38,12 +38,12 @@ public class MainTest {
         new Thread(() -> {
             try {
                 int count = 0;
-                while ( ! FactorizerExecutor.get().isFinished() && count < sleepBeforeStop) {
+                while ( ! FactorizerExecutor.Singleton.isFinished() && count < sleepBeforeStop) {
                     //noinspection BusyWait
                     Thread.sleep(1);
                     count++;
                 }
-                System.err.println("is finished: " + FactorizerExecutor.get().isFinished());
+                System.err.println("is finished: " + FactorizerExecutor.Singleton.isFinished());
                 Embedded.get().stop();
             } catch (InterruptedException | LifecycleException e) {
                 e.printStackTrace();

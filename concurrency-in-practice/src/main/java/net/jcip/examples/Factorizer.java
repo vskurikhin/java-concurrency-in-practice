@@ -1,6 +1,7 @@
 package net.jcip.examples;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.math.BigInteger;
 import java.util.Arrays;
 import javax.servlet.GenericServlet;
@@ -25,6 +26,7 @@ import su.svn.utils.PollardRho;
 @ThreadSafe
 public class Factorizer extends GenericServlet implements Servlet {
 
+    @Serial
     private static final long serialVersionUID = -6342065447646341351L;
 
     public static final Logger LOGGER = LoggerFactory.getLogger(Factorizer.class);

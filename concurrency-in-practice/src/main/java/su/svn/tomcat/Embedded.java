@@ -22,7 +22,8 @@ import java.io.IOException;
 
 public final class Embedded {
 
-    private static Embedded embedded;
+    // Авторы JSR-133 [5] рекомендуют использовать voloatile для Double Cheсked Lock.
+    private static volatile Embedded embedded;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Embedded.class);
 
@@ -32,9 +33,16 @@ public final class Embedded {
 
     private Context context;
 
-    public synchronized static Embedded get() {
-        if (embedded == null) {
-            embedded = new Embedded();
+    // Ленивая инициализация.
+    public static Embedded get() {
+        Embedded localInstance = embedded;
+        if (localInstance == null) {
+            synchronized (Embedded.class) {
+                localInstance = embedded;
+                if (localInstance == null) {
+                    embedded = new Embedded();
+                }
+            }
         }
         return embedded;
     }

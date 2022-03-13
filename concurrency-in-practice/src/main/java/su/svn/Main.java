@@ -4,6 +4,7 @@
 package su.svn;
 
 import su.svn.console.ConsoleStub;
+import su.svn.enums.Environment;
 import su.svn.executors.FactorizerExecutor;
 
 public class Main {
@@ -11,12 +12,12 @@ public class Main {
         ConsoleStub.get();
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
-                FactorizerExecutor.race();
+                Thread.sleep(Environment.PAUSE_BEFORE_WARMUP_IN_MS);
+                FactorizerExecutor.Singleton.race();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }).start();
-        Application.get().start();
+        Application.Instance.start();
     }
 }

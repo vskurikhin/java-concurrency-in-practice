@@ -5,11 +5,19 @@ import java.util.Optional;
 public enum Environment {
     Environment;
 
+    public static final String HOSTNAME = hostname("localhost");
+
     public static final int PORT = port("8080");
+
+    public static final int PAUSE_BEFORE_WARMUP_IN_MS = pauseBeforeWarmupInMs("4000");
 
     public static final String STATIC_DIR = staticDir("/tmp/tomcat-static");
 
     public static final String TMP_DIR = tmpDir("/tmp/tomcat-tmp");
+
+    private static String hostname(String localhost) {
+        return Optional.ofNullable(System.getenv("HOSTNAME")).orElse(localhost);
+    }
 
     public static int port(String port) {
         return Optional.ofNullable(System.getenv("PORT"))
@@ -17,8 +25,14 @@ public enum Environment {
                 .orElse(Integer.parseInt(port));
     }
 
+    public static int pauseBeforeWarmupInMs(String port) {
+        return Optional.ofNullable(System.getenv("PAUSE_BEFORE_WARMUP_IN_MS"))
+                .map(Integer::parseInt)
+                .orElse(Integer.parseInt(port));
+    }
+
     public static String staticDir(String dir) {
-        return Optional.ofNullable(System.getenv("STATIC_DIR")).orElse("/tmp/tomcat-static");
+        return Optional.ofNullable(System.getenv("STATIC_DIR")).orElse(dir);
     }
 
     public static String tmpDir(String dir) {

@@ -22,33 +22,49 @@ import java.io.IOException;
 
 public final class Embedded {
 
-    private static Embedded embedded;
+    // Авторы JSR-133 рекомендуют использовать voloatile для Double Cheсked Lock.
+    private static volatile Embedded embedded;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Embedded.class);
 
     private final Tomcat tomcat;
 
+    private final int port;
+
     private final String contextPath;
 
     private Context context;
 
-    public synchronized static Embedded get() {
-        if (embedded == null) {
-            embedded = new Embedded();
+    public static Embedded get() {
+        return createInstance(Environment.HOSTNAME, Environment.PORT);
+    }
+
+    // Ленивая инициализация.
+    public static Embedded createInstance(String hostname, int port) {
+        Embedded localInstance = embedded;
+        if (localInstance == null) {
+            synchronized (Embedded.class) {
+                localInstance = embedded;
+                if (localInstance == null) {
+                    embedded = new Embedded(hostname, port);
+                }
+            }
         }
         return embedded;
     }
 
-    private Embedded() {
+    private Embedded(String hostname, int port) {
         this.tomcat = new Tomcat();
         this.tomcat.setBaseDir(Environment.TMP_DIR);
-        this.tomcat.setPort(Environment.PORT);
+        this.tomcat.setHostname(hostname);
+        this.tomcat.setPort(port);
+        this.port = port;
 
         this.tomcat.setConnector(this.tomcat.getConnector());
         // предотвратить регистрацию сервлета jsp
         this.tomcat.setAddDefaultWebXmlToWebapp(false);
 
-        contextPath = ""; // root context
+        this.contextPath = ""; // root context
         //noinspection ResultOfMethodCallIgnored
         new File(Environment.STATIC_DIR).mkdirs();
         try {
@@ -58,6 +74,10 @@ public final class Embedded {
         } catch (IOException e) {
             LOGGER.error("StandardContext configuring", e);
         }
+    }
+
+    public int getPort() {
+        return port;
     }
 
     public Context getContext() {

@@ -5,22 +5,24 @@ import net.jcip.annotations.ThreadSafe;
 import net.jcip.examples.Factorizer;
 import org.apache.catalina.LifecycleException;
 import org.springframework.context.ApplicationContext;
+import su.svn.enums.Environment;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.SLF4JConfigurer;
 
-@ThreadSafe
-public class Application {
+import java.util.Optional;
 
-    private static volatile Application application;
+@ThreadSafe
+public enum Application {
+    Instance;
 
     @GuardedBy("this")
     private ApplicationContext rootContext;
 
     private final Embedded tomcat;
 
-    private Application() {
+    Application() {
         SLF4JConfigurer.install();
-        this.tomcat = Embedded.get();
+        this.tomcat = Embedded.createInstance(Environment.HOSTNAME, Environment.PORT);
 
         // нужно для правильной остановки сервлетов
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -30,15 +32,6 @@ public class Application {
                 e.printStackTrace();
             }
         }));
-    }
-
-    public static Application get() {
-        synchronized (Application.class) {
-            if (application == null) {
-                application = new Application();
-            }
-        }
-        return application;
     }
 
     public void start() throws LifecycleException {
@@ -51,17 +44,13 @@ public class Application {
         tomcat.stop();
     }
 
-    public void setRootContext(Object provider, ApplicationContext rootContext) {
+    public synchronized void setRootContext(Object provider, ApplicationContext rootContext) {
         if (provider instanceof su.svn.configs.ApplicationConfig && rootContext != null) {
-            synchronized (this) {
-                this.rootContext = rootContext;
-            }
+            this.rootContext = rootContext;
         }
     }
 
-    public ApplicationContext getRootContext() {
-        synchronized (this) {
-            return this.rootContext;
-        }
+    public synchronized Optional<ApplicationContext> getRootContext() {
+        return Optional.ofNullable(this.rootContext);
     }
 }

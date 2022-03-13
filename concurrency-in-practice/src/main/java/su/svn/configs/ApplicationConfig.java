@@ -10,6 +10,7 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import su.svn.Application;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
@@ -39,6 +40,6 @@ public class ApplicationConfig implements WebApplicationInitializer, Application
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        su.svn.Application.get().setRootContext(this, applicationContext);
+        Application.Instance.setRootContext(this, applicationContext);
     }
 }

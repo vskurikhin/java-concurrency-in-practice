@@ -12,7 +12,7 @@ import java.util.Map;
 public class TestController {
 
     @GetMapping(value = "test", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, String> dashboard() {
+    public Map<String, String> test() {
         return Map.of("test","test");
     }
 }

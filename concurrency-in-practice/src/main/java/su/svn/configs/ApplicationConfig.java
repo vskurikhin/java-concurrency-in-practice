@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
@@ -16,6 +17,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
 
 @Configuration
+@EnableAspectJAutoProxy
 @ComponentScan(basePackages = {"su.svn"})
 @Import({WebConfig.class})
 public class ApplicationConfig implements WebApplicationInitializer, ApplicationContextAware {

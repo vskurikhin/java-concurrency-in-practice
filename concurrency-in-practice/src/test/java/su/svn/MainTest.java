@@ -6,11 +6,17 @@ package su.svn;
 import org.apache.catalina.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import su.svn.executors.FactorizerExecutor;
 import su.svn.tomcat.Embedded;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.util.List;
+import java.util.Map;
 
 public class MainTest {
 
@@ -50,5 +56,14 @@ public class MainTest {
             }
         }).start();
         Main.main(new String[]{});
+    }
+
+    @Test
+    public void test1() {
+        ExpressionParser parser = new SpelExpressionParser();
+        EvaluationContext context = SimpleEvaluationContext.forReadOnlyDataBinding().build();
+
+        Map map = (Map) parser.parseExpression("{'admin':'password','user':'password'}").getValue(context);
+        System.err.println("map = " + map);
     }
 }

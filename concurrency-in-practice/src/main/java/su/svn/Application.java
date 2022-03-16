@@ -8,13 +8,14 @@ import org.springframework.context.ApplicationContext;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.SLF4JConfigurer;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 @ThreadSafe
 public class Application {
 
     private static volatile Application application;
 
-    @GuardedBy("this")
-    private ApplicationContext rootContext;
+    private static final AtomicReference<ApplicationContext> ctxRef = new AtomicReference<>(null);
 
     private final Embedded tomcat;
 
@@ -53,15 +54,15 @@ public class Application {
 
     public void setRootContext(Object provider, ApplicationContext rootContext) {
         if (provider instanceof su.svn.configs.ApplicationConfig && rootContext != null) {
-            synchronized (this) {
-                this.rootContext = rootContext;
-            }
+            this.ctxRef.compareAndSet(null, rootContext);
+            System.err.println("rootContext = " + this.ctxRef.getOpaque());
+            System.out.println("application = " + application);
         }
     }
 
     public ApplicationContext getRootContext() {
-        synchronized (this) {
-            return this.rootContext;
-        }
+        System.err.println("ctxRef.get() = " + this.ctxRef.getOpaque());
+        System.out.println("application = " + application);
+        return this.ctxRef.getOpaque();
     }
 }

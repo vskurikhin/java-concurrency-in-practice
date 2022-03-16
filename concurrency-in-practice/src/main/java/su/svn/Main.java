@@ -11,7 +11,7 @@ public class Main {
         ConsoleStub.get();
         new Thread(() -> {
             try {
-                Thread.sleep(1000);
+                Thread.sleep(10000);
                 FactorizerExecutor.race();
             } catch (Exception e) {
                 e.printStackTrace();

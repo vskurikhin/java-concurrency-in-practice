@@ -25,6 +25,7 @@ public class ApplicationConfig implements WebApplicationInitializer, Application
         AnnotationConfigWebApplicationContext rootContext = new AnnotationConfigWebApplicationContext();
         rootContext.register(ApplicationConfig.class);
         rootContext.register(DispatcherConfig.class);
+        rootContext.register(SecurityConfig.class);
         // rootContext.getEnvironment().setConversionService(new ApplicationConversionService());
 
         // Управление жизненным циклом «root» контекста приложения.

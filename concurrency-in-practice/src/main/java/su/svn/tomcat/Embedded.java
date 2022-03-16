@@ -11,6 +11,8 @@ import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.webresources.DirResourceSet;
 import org.apache.catalina.webresources.JarResourceSet;
 import org.apache.catalina.webresources.StandardRoot;
+import org.apache.tomcat.util.descriptor.web.FilterDef;
+import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import su.svn.enums.Environment;
@@ -76,6 +78,7 @@ public final class Embedded {
         addServlet(servletName, servlet, urlPattern);
 
         WebResourceRoot webResourceRoot = new StandardRoot(context);
+        defFilterAdd();
         defaultServletConfiguring();
         resourceRootConfiguring(webResourceRoot);
         start();
@@ -107,6 +110,18 @@ public final class Embedded {
         context.addServletMappingDecoded("/", defaultServletName);
         // index.html on http://127.0.0.1:8080
         context.addWelcomeFile("index.html");
+    }
+
+    private void defFilterAdd() {
+        FilterDef filterDef = new FilterDef();
+        filterDef.setFilterName("springSecurityFilterChain");
+        filterDef.setFilterClass("org.springframework.web.filter.DelegatingFilterProxy");
+        context.addFilterDef(filterDef);
+
+        FilterMap filterMapping = new FilterMap();
+        filterMapping.setFilterName("springSecurityFilterChain");
+        filterMapping.addURLPattern("/*");
+        context.addFilterMap(filterMapping);
     }
 
     private void resourceRootConfiguring(WebResourceRoot webResourceRoot) {

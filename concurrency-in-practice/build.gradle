@@ -69,7 +69,11 @@ dependencies {
     implementation "org.apache.tomcat.embed:tomcat-embed-core:$libVers.tomcat_embed_core"
     implementation "org.reflections:reflections:$libVers.org_reflections"
     implementation "org.slf4j:jul-to-slf4j:$libVers.jul_to_slf4j"
+    implementation "org.springframework:spring-expression:$libVers.springframework"
     implementation "org.springframework:spring-webmvc:$libVers.springframework"
+    implementation "org.springframework.security:spring-security-config:5.6.2"
+    implementation "org.springframework.security:spring-security-core:5.6.2"
+    implementation "org.springframework.security:spring-security-web:5.6.2"
 
     compileOnly "javax.servlet:javax.servlet-api:$libVers.javax_servlet_api"
 

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Optional;
 
 @WebServlet(urlPatterns = "/context", loadOnStartup = 1)
 public class RootContextServlet extends HttpServlet {
@@ -26,16 +27,27 @@ public class RootContextServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        PrintWriter writer = resp.getWriter();
+        final PrintWriter writer = resp.getWriter();
 
         writer.println("<html><title>Spring context</title><body>");
         writer.println("<h1>Spring context bean list:</h1>");
-        LOGGER.info("{}", Application.get().getRootContext());
-        ApplicationContext context = Application.get().getRootContext();
+        Optional.ofNullable(Application.Instance.getRootContext())
+                .ifPresentOrElse(
+                        c -> outRootContext(writer, c),
+                        () -> outEmpty(writer)
+                );
+        writer.println("</body></html>");
+    }
+
+    private void outRootContext(PrintWriter writer, ApplicationContext context) {
+        LOGGER.info("Root context {}", context);
         for (String name : context.getBeanDefinitionNames()) {
             writer.println(name + "<br>");
         }
-        writer.println("</body></html>");
+    }
+
+    private void outEmpty(PrintWriter writer) {
+        LOGGER.error("Root context is null!");
     }
 
     @Override

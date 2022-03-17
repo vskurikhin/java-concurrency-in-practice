@@ -2,26 +2,25 @@ package su.svn;
 
 import net.jcip.annotations.GuardedBy;
 import net.jcip.annotations.ThreadSafe;
-import net.jcip.examples.Factorizer;
 import org.apache.catalina.LifecycleException;
 import org.springframework.context.ApplicationContext;
+import su.svn.enums.Environment;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.SLF4JConfigurer;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 @ThreadSafe
-public class Application {
+public enum Application {
+    Instance;
 
-    private static volatile Application application;
+    @GuardedBy("Application.class")
+    private volatile ApplicationContext context;
 
-    private static final AtomicReference<ApplicationContext> ctxRef = new AtomicReference<>(null);
-
+    @GuardedBy("Application.class")
     private final Embedded tomcat;
 
-    private Application() {
+    Application() {
         SLF4JConfigurer.install();
-        this.tomcat = Embedded.get();
+        this.tomcat = Embedded.createInstance(Environment.HOSTNAME, Environment.PORT);
 
         // нужно для правильной остановки сервлетов
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -33,18 +32,9 @@ public class Application {
         }));
     }
 
-    public static Application get() {
-        synchronized (Application.class) {
-            if (application == null) {
-                application = new Application();
-            }
-        }
-        return application;
-    }
-
     public void start() throws LifecycleException {
-        synchronized (this) {
-            tomcat.start(new Factorizer());
+        synchronized (Application.class) {
+            tomcat.start();
         }
     }
 
@@ -54,15 +44,20 @@ public class Application {
 
     public void setRootContext(Object provider, ApplicationContext rootContext) {
         if (provider instanceof su.svn.configs.ApplicationConfig && rootContext != null) {
-            this.ctxRef.compareAndSet(null, rootContext);
-            System.err.println("rootContext = " + this.ctxRef.getOpaque());
-            System.out.println("application = " + application);
+            synchronized (Application.class) {
+                this.context = rootContext;
+            }
         }
     }
 
     public ApplicationContext getRootContext() {
-        System.err.println("ctxRef.get() = " + this.ctxRef.getOpaque());
-        System.out.println("application = " + application);
-        return this.ctxRef.getOpaque();
+        synchronized (Application.class) {
+            return this.context;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + "@" + Integer.toHexString(hashCode());
     }
 }

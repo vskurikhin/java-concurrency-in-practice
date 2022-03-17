@@ -1,5 +1,6 @@
 package su.svn.configs;
 
+import net.jcip.examples.Factorizer;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -10,6 +11,8 @@ import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import su.svn.Application;
+import su.svn.executors.FactorizerExecutor;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
@@ -26,7 +29,6 @@ public class ApplicationConfig implements WebApplicationInitializer, Application
         rootContext.register(ApplicationConfig.class);
         rootContext.register(DispatcherConfig.class);
         rootContext.register(SecurityConfig.class);
-        // rootContext.getEnvironment().setConversionService(new ApplicationConversionService());
 
         // Управление жизненным циклом «root» контекста приложения.
         container.addListener(new ContextLoaderListener(rootContext));
@@ -36,10 +38,17 @@ public class ApplicationConfig implements WebApplicationInitializer, Application
                 .addServlet("dispatcher", new DispatcherServlet(rootContext));
         dispatcher.setLoadOnStartup(1);
         dispatcher.addMapping("/");
+
+        ServletRegistration.Dynamic factorizer = container
+                .addServlet("factorizer", new Factorizer());
+        factorizer.setLoadOnStartup(1);
+        factorizer.addMapping("/go");
+
+        new Thread(FactorizerExecutor.Singleton::race).start();
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        su.svn.Application.get().setRootContext(this, applicationContext);
+        Application.Instance.setRootContext(this, applicationContext);
     }
 }

@@ -3,15 +3,9 @@
  */
 package su.svn;
 
-import org.springframework.context.ApplicationContext;
-import su.svn.console.ConsoleStub;
-import su.svn.enums.Environment;
-import su.svn.executors.FactorizerExecutor;
-
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        ConsoleStub.get();
         Application.Instance.start();
     }
 }

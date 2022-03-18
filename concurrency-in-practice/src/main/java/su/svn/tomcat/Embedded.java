@@ -55,27 +55,8 @@ public final class Embedded {
         return embedded;
     }
 
-    private Embedded(String hostname, int port) {
-        this.tomcat = new Tomcat();
-        this.tomcat.setBaseDir(Environment.TMP_DIR);
-        this.tomcat.setHostname(hostname);
-        this.tomcat.setPort(port);
-        this.port = port;
-
-        this.tomcat.setConnector(this.tomcat.getConnector());
-        // предотвратить регистрацию сервлета jsp
-        this.tomcat.setAddDefaultWebXmlToWebapp(false);
-
-        this.contextPath = ""; // root context
-        //noinspection ResultOfMethodCallIgnored
-        new File(Environment.STATIC_DIR).mkdirs();
-        try {
-            String docBase = new File(Environment.STATIC_DIR).getCanonicalPath();
-            this.context = this.tomcat.addWebapp(contextPath, docBase);
-            standardContextConfigurer(this.context);
-        } catch (IOException e) {
-            LOGGER.error("StandardContext configuring", e);
-        }
+    public Object getAttribute(String name) {
+        return this.context.getServletContext().getAttribute(name);
     }
 
     public int getPort() {
@@ -99,6 +80,33 @@ public final class Embedded {
         tomcat.start();
         Server server = tomcat.getServer();
         server.await();
+    }
+
+    public void stop() throws LifecycleException {
+        tomcat.getServer().stop();
+    }
+
+    private Embedded(String hostname, int port) {
+        this.tomcat = new Tomcat();
+        this.tomcat.setBaseDir(Environment.TMP_DIR);
+        this.tomcat.setHostname(hostname);
+        this.tomcat.setPort(port);
+        this.port = port;
+
+        this.tomcat.setConnector(this.tomcat.getConnector());
+        // предотвратить регистрацию сервлета jsp
+        this.tomcat.setAddDefaultWebXmlToWebapp(false);
+
+        this.contextPath = ""; // root context
+        //noinspection ResultOfMethodCallIgnored
+        new File(Environment.STATIC_DIR).mkdirs();
+        try {
+            String docBase = new File(Environment.STATIC_DIR).getCanonicalPath();
+            this.context = this.tomcat.addWebapp(contextPath, docBase);
+            standardContextConfigurer(this.context);
+        } catch (IOException e) {
+            LOGGER.error("StandardContext configuring", e);
+        }
     }
 
     private void standardContextConfigurer(Context context) {
@@ -147,7 +155,7 @@ public final class Embedded {
 
         String webAppMount = "/WEB-INF/classes";
         WebResourceSet webResourceSet;
-        if ( ! Resource.isJar()) {
+        if (!Resource.isJar()) {
             // potential dangerous - if last argument will "/" that means tomcat will serves self jar with .class files
             String base = Resource.getResourceFromFs();
             webResourceSet = new DirResourceSet(webResourceRoot, webAppMount, base, "/");
@@ -159,13 +167,9 @@ public final class Embedded {
         context.setResources(webResourceRoot);
     }
 
-    public void stop() throws LifecycleException {
-        tomcat.getServer().stop();
-    }
-
     @Override
     public String toString() {
-        return "Embedded{" +
+        return getClass().getName() + "@" + Integer.toHexString(hashCode()) + "{" +
                 "tomcat=" + tomcat +
                 '}';
     }

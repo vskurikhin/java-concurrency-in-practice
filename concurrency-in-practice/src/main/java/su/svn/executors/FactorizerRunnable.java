@@ -1,7 +1,9 @@
 package su.svn.executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import su.svn.Application;
-import su.svn.console.ConsoleStub;
 import su.svn.enums.Environment;
 import su.svn.tomcat.Embedded;
 import su.svn.utils.BigIntegerRandom;
@@ -20,6 +22,8 @@ import java.util.Random;
 
 class FactorizerRunnable implements Runnable {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FactorizerRunnable.class);
+
     static final BigInteger start = BigIntegerRandom.get();
 
     private final String URL = "http://localhost:" + Embedded.get().getPort() + "/go?n=";
@@ -29,6 +33,7 @@ class FactorizerRunnable implements Runnable {
 
     private String getNext() throws IOException, InterruptedException {
         String basicAuth = getBasicAuth();
+        LOGGER.info("getBasicAuth {}", basicAuth);
         String url = URL + add();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -47,11 +52,13 @@ class FactorizerRunnable implements Runnable {
     }
 
     private String getBasicAuth() {
-        for (int i = 0; i < 9 && Application.Instance.getRootContext() == null; i++) {
+        ApplicationContext rootContext = Application.Instance.getRootContext();
+        for (int i = 0; i < 9 && rootContext == null; i++) {
+            rootContext = Application.Instance.getRootContext();
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error("sleep ", e);
             }
         }
         Object o = Application.Instance.getRootContext().getBean("users");
@@ -73,7 +80,7 @@ class FactorizerRunnable implements Runnable {
     @Override
     public void run() {
         try {
-            ConsoleStub.println(this.getNext());
+            this.getNext();
             FactorizerExecutor.Singleton.finish();
         } catch (Exception e) {
             Thread.currentThread().interrupt();

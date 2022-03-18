@@ -46,7 +46,7 @@ public enum FactorizerExecutor {
         }
         exec.shutdown();
         try {
-            if (exec.awaitTermination(2L * Environment.PAUSE_BEFORE_WARMUP_IN_MS, TimeUnit.MILLISECONDS)) {
+            if (exec.awaitTermination(9L * Environment.PAUSE_BEFORE_WARMUP_IN_MS, TimeUnit.MILLISECONDS)) {
                 LOGGER.debug("awaitTermination returned true");
             } else {
                 LOGGER.error("awaitTermination returned false");
@@ -60,5 +60,10 @@ public enum FactorizerExecutor {
         //noinspection UnusedAssignment
         exec = null;
         System.gc();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getName() + "@" + Integer.toHexString(hashCode());
     }
 }

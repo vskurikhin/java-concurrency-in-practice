@@ -6,10 +6,6 @@ package su.svn;
 import org.apache.catalina.LifecycleException;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.expression.EvaluationContext;
-import org.springframework.expression.ExpressionParser;
-import org.springframework.expression.spel.standard.SpelExpressionParser;
-import org.springframework.expression.spel.support.SimpleEvaluationContext;
 import su.svn.enums.Environment;
 import su.svn.executors.FactorizerExecutor;
 import su.svn.tomcat.Embedded;
@@ -17,8 +13,6 @@ import su.svn.utils.EnvironmentVariable;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 public class MainIT {
@@ -52,13 +46,19 @@ public class MainIT {
                 + FactorizerExecutor.START_POINT * FactorizerExecutor.MAX_SIZE;
         new Thread(() -> {
             try {
+                Thread.sleep(Environment.PAUSE_BEFORE_WARMUP_IN_MS);
+                FactorizerExecutor executor = null;
                 int count = 0;
-                while ( ! FactorizerExecutor.Singleton.isFinished() && count < sleepBeforeStop) {
-                    //noinspection BusyWait
-                    Thread.sleep(1000);
+                do {
+                    executor = (FactorizerExecutor) Application.Instance
+                            .getAttribute("factorizerExecutor");
+                    Thread.sleep(10);
+                    count++;
+                } while (executor == null);
+                while (! executor.isFinished() && count < sleepBeforeStop) {
+                    Thread.sleep(10);
                     count++;
                 }
-                System.err.println("is finished: " + FactorizerExecutor.Singleton.isFinished());
                 Embedded.get().stop();
             } catch (InterruptedException | LifecycleException e) {
                 e.printStackTrace();

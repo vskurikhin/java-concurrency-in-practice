@@ -1,6 +1,8 @@
 package su.svn.configs;
 
 import net.jcip.examples.Factorizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -13,6 +15,7 @@ import org.springframework.web.context.support.AnnotationConfigWebApplicationCon
 import org.springframework.web.servlet.DispatcherServlet;
 import su.svn.Application;
 import su.svn.executors.FactorizerExecutor;
+import su.svn.holders.ApplicationContextHolder;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRegistration;
@@ -22,6 +25,8 @@ import javax.servlet.ServletRegistration;
 @Import({WebConfig.class})
 public class ApplicationConfig implements WebApplicationInitializer, ApplicationContextAware {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationConfig.class);
+
     @Override
     public void onStartup(ServletContext container) {
         /// Создаём «root» контекст приложения Spring.
@@ -29,6 +34,8 @@ public class ApplicationConfig implements WebApplicationInitializer, Application
         rootContext.register(ApplicationConfig.class);
         rootContext.register(DispatcherConfig.class);
         rootContext.register(SecurityConfig.class);
+        container.setAttribute("rootContext", rootContext);
+        LOGGER.info("Attribute rootContext: {}", container.getAttribute("rootContext"));
 
         // Управление жизненным циклом «root» контекста приложения.
         container.addListener(new ContextLoaderListener(rootContext));
@@ -43,6 +50,9 @@ public class ApplicationConfig implements WebApplicationInitializer, Application
                 .addServlet("factorizer", new Factorizer());
         factorizer.setLoadOnStartup(1);
         factorizer.addMapping("/go");
+
+        container.setAttribute("factorizerExecutor", FactorizerExecutor.Singleton);
+        LOGGER.info("Attribute factorizerExecutor: {}", container.getAttribute("factorizerExecutor"));
 
         new Thread(FactorizerExecutor.Singleton::race).start();
     }

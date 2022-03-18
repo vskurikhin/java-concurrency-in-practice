@@ -25,7 +25,7 @@ public enum Application {
         // нужно для правильной остановки сервлетов
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
-                tomcat.stop();
+                this.tomcat.stop();
             } catch (LifecycleException e) {
                 e.printStackTrace();
             }
@@ -51,9 +51,11 @@ public enum Application {
     }
 
     public ApplicationContext getRootContext() {
-        synchronized (Application.class) {
-            return this.context;
-        }
+        return this.context;
+    }
+
+    public Object getAttribute(String name) {
+        return this.tomcat.getAttribute(name);
     }
 
     @Override

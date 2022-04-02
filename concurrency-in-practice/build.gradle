@@ -38,7 +38,8 @@ ext.libVers = [
         junit                           : '5.8.1',
         logback_classic                 : '1.2.10',
         org_reflections                 : '0.10.2',
-        springframework                 : '5.3.16',
+        spring_security                 : '5.6.2',
+        springframework                 : '5.3.18',
         tomcat_embed_core               : '9.0.58',
 ]
 
@@ -71,6 +72,8 @@ dependencies {
     implementation "org.aspectj:aspectjweaver:$libVers.aspectj"
     implementation "org.reflections:reflections:$libVers.org_reflections"
     implementation "org.slf4j:jul-to-slf4j:$libVers.jul_to_slf4j"
+    implementation "org.springframework.security:spring-security-config:$libVers.spring_security"
+    implementation "org.springframework.security:spring-security-web:$libVers.spring_security"
     implementation "org.springframework:spring-aop:$libVers.springframework"
     implementation "org.springframework:spring-webmvc:$libVers.springframework"
 

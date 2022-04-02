@@ -1,10 +1,12 @@
 package su.svn.components;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import su.svn.aspects.Loggable;
 
 import javax.annotation.Resource;
 
+@Primary
 @Component("testComp2")
 public class TestComp2Impl {
 
@@ -13,7 +15,6 @@ public class TestComp2Impl {
 
     @Loggable(type = "ok test1")
     public String test1() {
-
         return "test1 ";
     }
 

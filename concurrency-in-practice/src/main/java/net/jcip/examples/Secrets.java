@@ -1,7 +1,6 @@
 package net.jcip.examples;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Secrets
@@ -10,13 +9,14 @@ import java.util.Set;
  *
  * @author Brian Goetz and Tim Peierls
  */
-public class Secrets {
+class Secrets {
     public static Set<Secret> knownSecrets;
 
     public void initialize() {
         knownSecrets = new HashSet<Secret>();
     }
 }
+
 
 class Secret {
 }

@@ -3,8 +3,6 @@ package su.svn.data.structures;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Random;
-
 public class AVLTreeImplTest {
 
     TreeInt tree;
@@ -22,7 +20,7 @@ public class AVLTreeImplTest {
     public void insert() {
         long memBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         System.err.println("memBefore: " + memBefore);
-        for (int i = 0; i < Integer.MAX_VALUE / 512; i++) {
+        for (int i = 0; i < Integer.MAX_VALUE / 32768; i++) {
             tree.insert(i);
         }
         long memAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -42,9 +40,9 @@ public class AVLTreeImplTest {
     public void height() {
     }
 
-    static class TreeInt extends AVLTreeImpl<Integer, TreeInt.NodeInt> {
+    static class TreeInt extends su.svn.data.structures.AVLTreeImpl<Integer, TreeInt.NodeInt> {
 
-        static class NodeInt implements AVLTree.Node<Integer> {
+        static class NodeInt implements su.svn.data.structures.AVLTree.Node<Integer> {
             private final int key;
             private int height;
             private NodeInt left;

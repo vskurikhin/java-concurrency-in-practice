@@ -1,227 +1,268 @@
 package su.svn.data.structures.concurrent;
 
+import net.jcip.annotations.ThreadSafe;
+
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Function;
 
+@ThreadSafe
 public class ConcurrentAVLTreeImpl<K, N extends ConcurrentAVLTree.Node<K>> implements ConcurrentAVLTree<K, N> {
 
-    private volatile N root;
+    private final AtomicReference<N> root;
+
+    private final ReadWriteLock lock;
 
     private final Function<K, N> supplier;
 
     private ConcurrentAVLTreeImpl() {
+        root = null;
+        lock = null;
         supplier = null;
     }
 
     protected ConcurrentAVLTreeImpl(Function<K, N> supplier) {
+        this.root = new AtomicReference<>();
+        this.lock = new ReentrantReadWriteLock();
         this.supplier = supplier;
     }
 
-    public ConcurrentAVLTreeImpl(Class<N> c, Class<K> keyClass) {
-        this.supplier = k -> {
+    public ConcurrentAVLTreeImpl(Class<N> nodeClass, Class<K> keyClass) {
+        this(key -> {
             try {
-                return c.getConstructor(keyClass).newInstance(k);
-            } catch (Exception e) {
+                return nodeClass.getConstructor(keyClass).newInstance(key);
+            } catch (ReflectiveOperationException e) {
                 throw new RuntimeException(e);
             }
-        };
+        });
     }
 
     @Override
     public N find(K key) {
-        N current = root;
-        while (current != null) {
-            ReadWriteLock lock;
-            synchronized (this) {
-                lock = current.getRWLock();
-                lock.readLock().lock();
+        try {
+            lock.readLock().lock();
+            N current = this.root.get();
+            while (current != null) {
+                if (current.equal(key)) {
+                    break;
+                }
+                current = current.less(key) ? current.getRight() : current.getLeft();
             }
-            if (current.equal(key)) {
-                break;
-            }
-            current = current.less(key) ? current.getRight() : current.getLeft();
+            return current;
+        } finally {
             lock.readLock().unlock();
         }
-        return current;
     }
 
     @Override
-    public void insert(K key) {
-        N r = insert(root, key);
-        synchronized (this) {
-            root = r;
-        }
-    }
+    public boolean insert(K key) {
+        try {
+            lock.writeLock().lock();
+            N node = this.root.get();
+            if (node == null) {
+                N n = create(key, null);
+                this.root.compareAndSet(null, n);
+                return true;
+            }
 
-    @Override
-    public void delete(K key) {
-        N r = delete(root, key);
-        synchronized (this) {
-            root = r;
+            while (true) {
+                if (node.getKey().equals(key))
+                    return false;
+
+                N parent = node;
+
+                boolean goLeft = node.more(key);
+                node = goLeft ? node.getLeft() : node.getRight();
+
+                if (node == null) {
+                    if (goLeft) {
+                        parent.setLeft(create(key, parent));
+                    } else {
+                        parent.setRight(create(key, parent));
+                    }
+                    rebalance(parent);
+                    break;
+                }
+            }
+            return true;
+        } finally {
+            lock.writeLock().unlock();
         }
     }
 
     @Override
     public N getRoot() {
-        return root;
+        return this.root.get();
     }
 
-    public int height() {
-        return root == null ? -1 : root.getHeight();
+    private N create(K key, N parent) {
+        N node = supplier.apply(key);
+        node.setParent(parent);
+        return node;
     }
 
-    private N insert(N node, K key) {
-        if (node == null) {
-            return supplier.apply(key);
-        } else if (node.more(key)) {
-            node.getRWLock().writeLock().lock();
-            node.setLeft(insert(node.getLeft(), key));
-            node.getRWLock().writeLock().unlock();
-        } else if (node.less(key)) {
-            node.getRWLock().writeLock().lock();
-            node.setRight(insert(node.getRight(), key));
-            node.getRWLock().writeLock().unlock();
+    @Override
+    public void delete(K key) {
+        try {
+            lock.writeLock().lock();
+            if (this.root.get() == null)
+                return;
+
+            N child = this.root.get();
+            while (child != null) {
+                N node = child;
+                child = node.less(key) || node.equal(key) ? node.getRight() : node.getLeft();
+                if (node.equal(key)) {
+                    delete(node);
+                    return;
+                }
+            }
+        } finally {
+            lock.writeLock().unlock();
         }
-        return rebalance(node);
     }
 
-    private N delete(N node, K key) {
-        if (node == null) {
-            return node;
-        } else if (node.more(key)) {
-            node.getRWLock().writeLock().lock();
-            node.setLeft(insert(node.getLeft(), key));
-            node.getRWLock().writeLock().unlock();
-        } else if (node.less(key)) {
-            node.getRWLock().writeLock().lock();
-            node.setRight(insert(node.getRight(), key));
-            node.getRWLock().writeLock().unlock();
+    private void delete(N node) {
+
+        if (node.getLeft() == null && node.getRight() == null) {
+            if (node.getParent() == null) {
+                this.root.set(null);
+            } else {
+                N parent = node.getParent();
+                if (parent.getLeft().equal(node.getKey())) {
+                    parent.setLeft(null);
+                } else {
+                    parent.setRight(null);
+                }
+                rebalance(parent);
+            }
+            return;
+        }
+
+        if (node.getLeft() != null) {
+            N child = node.getLeft();
+            while (child.getRight() != null) child = child.getRight();
+            // node.key = child.key;
+            replace(node, child);
+            delete(child);
         } else {
-            if (node.getLeft() == null || node.getRight() == null) {
-                ReadWriteLock lock;
-                synchronized (this) {
-                    lock = node.getRWLock();
-                    lock.writeLock().lock();
-                }
-                node = (node.getLeft() == null) ? node.getRight() : node.getLeft();
-                lock.writeLock().unlock();
-            } else {
-                ReadWriteLock lock;
-                synchronized (this) {
-                    lock = node.getRWLock();
-                    lock.writeLock().lock();
-                }
-                N oldLeft = node.getLeft();
-                N oldRight = node.getRight();
-                node = mostLeftChild(node.getRight());
-                node.setRight(delete(oldRight, node.getKey()));
-                node.setLeft(oldLeft);
-                lock.writeLock().unlock();
-            }
+            N child = node.getRight();
+            while (child.getLeft() != null) child = child.getLeft();
+            // node.key = child.key;
+            replace(node, child);
+            delete(child);
         }
-        if (node != null) {
-            node = rebalance(node);
-        }
-        return node;
     }
 
-    private N mostLeftChild(N node) {
-        N current = node;
-        /* loop down to find the leftmost leaf */
-        while (current.getLeft() != null) {
-            current = current.getLeft();
+    private void replace(N node, N child) {
+        N parent = node.getParent();
+        N replace = create(child.getKey(), parent);
+        replace.setLeft(node.getLeft());
+        replace.setRight(node.getRight());
+        if (parent.getLeft().equal(node.getKey())) {
+            parent.setLeft(replace);
+        } else {
+            parent.setRight(replace);
         }
-        return current;
     }
 
-    private N rebalance(N node) {
-        updateHeight(node);
-        int balance = getBalance(node);
-        if (balance > 1) {
-            if (height(node.getRight().getRight()) > height(node.getRight().getLeft())) {
-                ReadWriteLock lock;
-                synchronized (this) {
-                    lock = node.getRWLock();
-                    lock.writeLock().lock();
-                }
-                node = rotateLeft(node);
-                lock.writeLock().unlock();
-            } else {
-                ReadWriteLock lock;
-                synchronized (this) {
-                    lock = node.getRWLock();
-                    lock.writeLock().lock();
-                }
-                node.setRight(rotateRight(node.getRight()));
-                node = rotateLeft(node);
-                lock.writeLock().unlock();
-            }
-        } else if (balance < -1) {
-            if (height(node.getLeft().getLeft()) > height(node.getLeft().getRight())) {
-                ReadWriteLock lock;
-                synchronized (this) {
-                    lock = node.getRWLock();
-                    lock.writeLock().lock();
-                }
+    private void rebalance(N node) {
+        setBalance(node);
+
+        if (node.getBalance() == -2) {
+            if (node.getLeft().getLeft().getHeight() >= node.getLeft().getRight().getHeight())
                 node = rotateRight(node);
-                lock.writeLock().unlock();
-            } else {
-                ReadWriteLock lock;
-                synchronized (this) {
-                    lock = node.getRWLock();
-                    lock.writeLock().lock();
-                }
-                node.setLeft(rotateLeft(node.getLeft()));
-                node = rotateRight(node);
-                lock.writeLock().unlock();
-            }
+            else
+                node = rotateLeftThenRight(node);
+        } else if (node.getBalance() == 2) {
+            if (node.getRight().getRight().getHeight() >= node.getRight().getLeft().getHeight())
+                node = rotateLeft(node);
+            else
+                node = rotateRightThenLeft(node);
         }
-        return node;
+
+        if (node.getParent() != null) {
+            rebalance(node.getParent());
+        } else {
+            N root = this.root.get();
+            this.root.compareAndSet(root, node);
+        }
     }
 
-    private N rotateRight(N node) {
-        N x = node.getLeft();
-        N z = x.getRight();
-        x.setRight(node);
-        node.setLeft(z);
-        updateHeight(node);
-        updateHeight(x);
-        return x;
+    private N rotateLeftThenRight(N node) {
+        node.setLeft(rotateLeft(node.getLeft()));
+        return rotateRight(node);
+    }
+
+    private N rotateRightThenLeft(N node) {
+        node.setRight(rotateRight(node.getRight()));
+        return rotateLeft(node);
     }
 
     private N rotateLeft(N node) {
-        N x = node.getRight();
-        N z = x.getLeft();
-        x.setLeft(node);
-        node.setRight(z);
-        updateHeight(node);
-        updateHeight(x);
-        return x;
-    }
 
-    private void updateHeight(N n) {
-        n.setHeight(1 + Math.max(height(n.getLeft()), height(n.getRight())));
-    }
+        N up = node.getRight();
+        up.setParent(node.getParent());
 
-    private int height(N n) {
-        return n == null ? -1 : n.getHeight();
-    }
+        node.setRight(up.getLeft());
 
-    private int getBalance(N n) {
-        return (n == null) ? 0 : height(n.getRight()) - height(n.getLeft());
-    }
+        if (node.getRight() != null)
+            node.getRight().setParent(node);
 
+        up.setLeft(node);
+        node.setParent(up);
 
-
-
-    public void print(K key) {
-        N current = root;
-        while (current != null) {
-            System.out.println("current = " + current.getKey());
-            if (current.equal(key)) {
-                break;
+        if (up.getParent() != null) {
+            if (up.getParent().getRight().equal(node.getKey())) {
+                up.getParent().setRight(up);
+            } else {
+                up.getParent().setLeft(up);
             }
-            current = current.less(key) ? current.getRight() : current.getLeft();
+        }
+
+        setBalance(node, up);
+
+        return up;
+    }
+
+    private N rotateRight(N node) {
+
+        N up = node.getLeft();
+        up.setParent(node.getParent());
+
+        node.setLeft(up.getRight());
+
+        if (node.getLeft() != null)
+            node.getLeft().setParent(node);
+
+        up.setRight(node);
+        node.setParent(up);
+
+        if (up.getParent() != null) {
+            if (up.getParent().getRight().equal(node.getKey())) {
+                up.getParent().setRight(up);
+            } else {
+                up.getParent().setLeft(up);
+            }
+        }
+
+        setBalance(node, up);
+
+        return up;
+    }
+
+    @SafeVarargs
+    private void setBalance(N... nodes) {
+        for (N node : nodes) {
+            reheight(node);
+            node.setBalance(node.getRight().getHeight() - node.getLeft().getHeight());
+        }
+    }
+
+    private void reheight(N node) {
+        if (node != null) {
+            node.setHeight(1 + Math.max(node.getLeft().getHeight(), node.getRight().getHeight()));
         }
     }
 }

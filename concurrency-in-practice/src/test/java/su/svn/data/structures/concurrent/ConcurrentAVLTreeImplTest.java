@@ -32,28 +32,32 @@ public class ConcurrentAVLTreeImplTest {
 
     @Test
     public void insert() throws InterruptedException {
-        ExecutorService exec = Executors.newFixedThreadPool(256);
-        long memBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        System.err.println("memBefore: " + memBefore);
-        for (int i = 0; i < 8192; i++) {
+        for (int i = 0; i < 10; i++) {
             final int j = i;
-            exec.execute(new Runnable() {
-                @Override
-                public void run() {
-                    tree.insert(j);
-                }
-            });
+            tree.insert(j);
         }
-        exec.shutdown();
-        if (exec.awaitTermination(30, TimeUnit.SECONDS)) {
-            System.err.println("awaitTermination returned true");
-        } else {
-            System.err.println("awaitTermination returned false");
-        }
-        exec.shutdownNow();
-        long memAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-        System.err.println("memAfter: " + memAfter);
-        tree.print(Integer.MAX_VALUE);
+//        ExecutorService exec = Executors.newFixedThreadPool(256);
+//        long memBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+//        System.err.println("memBefore: " + memBefore);
+//        for (int i = 0; i < 8192; i++) {
+//            final int j = i;
+//            exec.execute(new Runnable() {
+//                @Override
+//                public void run() {
+//                    tree.insert(j);
+//                }
+//            });
+//        }
+//        exec.shutdown();
+//        if (exec.awaitTermination(30, TimeUnit.SECONDS)) {
+//            System.err.println("awaitTermination returned true");
+//        } else {
+//            System.err.println("awaitTermination returned false");
+//        }
+//        exec.shutdownNow();
+//        long memAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+//        System.err.println("memAfter: " + memAfter);
+//        tree.print(Integer.MAX_VALUE);
     }
 
     @Test
@@ -99,20 +103,29 @@ public class ConcurrentAVLTreeImplTest {
 
         static class NodeInt implements ConcurrentAVLTree.Node<Integer> {
             private final int key;
+            private int balance;
             private int height;
             private NodeInt left;
+            private NodeInt parent;
             private NodeInt right;
-
-            private final ReadWriteLock lock;
 
             NodeInt(int key) {
                 this.key = key;
-                this.lock = new ReentrantReadWriteLock();
             }
 
             @Override
             public Integer getKey() {
                 return key;
+            }
+
+            @Override
+            public int getBalance() {
+                return balance;
+            }
+
+            @Override
+            public void setBalance(int balance) {
+                this.balance = balance;
             }
 
             @Override
@@ -126,11 +139,6 @@ public class ConcurrentAVLTreeImplTest {
             }
 
             @Override
-            public ReadWriteLock getRWLock() {
-                return lock;
-            }
-
-            @Override
             @SuppressWarnings("unchecked")
             public NodeInt getLeft() {
                 return left;
@@ -139,6 +147,17 @@ public class ConcurrentAVLTreeImplTest {
             @Override
             public <X extends Node<Integer>> void setLeft(X left) {
                 this.left = (NodeInt) left;
+            }
+
+            @Override
+            @SuppressWarnings("unchecked")
+            public NodeInt getParent() {
+                return parent;
+            }
+
+            @Override
+            public <X extends Node<Integer>> void setParent(X parent) {
+                this.parent = (NodeInt) parent;
             }
 
             @Override

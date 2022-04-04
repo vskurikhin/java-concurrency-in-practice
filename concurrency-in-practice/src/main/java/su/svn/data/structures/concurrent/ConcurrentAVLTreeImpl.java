@@ -171,12 +171,12 @@ public class ConcurrentAVLTreeImpl<K, N extends ConcurrentAVLTree.Node<K>> imple
         setBalance(node);
 
         if (node.getBalance() == -2) {
-            if (node.getLeft().getLeft().getHeight() >= node.getLeft().getRight().getHeight())
+            if (height(node.getLeft().getLeft()) >= height(node.getLeft().getRight()))
                 node = rotateRight(node);
             else
                 node = rotateLeftThenRight(node);
         } else if (node.getBalance() == 2) {
-            if (node.getRight().getRight().getHeight() >= node.getRight().getLeft().getHeight())
+            if (height(node.getRight().getRight()) >= height(node.getRight().getLeft()))
                 node = rotateLeft(node);
             else
                 node = rotateRightThenLeft(node);
@@ -214,7 +214,7 @@ public class ConcurrentAVLTreeImpl<K, N extends ConcurrentAVLTree.Node<K>> imple
         node.setParent(up);
 
         if (up.getParent() != null) {
-            if (up.getParent().getRight().equal(node.getKey())) {
+            if (up.getParent().getRight() == node) {
                 up.getParent().setRight(up);
             } else {
                 up.getParent().setLeft(up);
@@ -240,7 +240,7 @@ public class ConcurrentAVLTreeImpl<K, N extends ConcurrentAVLTree.Node<K>> imple
         node.setParent(up);
 
         if (up.getParent() != null) {
-            if (up.getParent().getRight().equal(node.getKey())) {
+            if (up.getParent().getRight() == node) {
                 up.getParent().setRight(up);
             } else {
                 up.getParent().setLeft(up);
@@ -256,13 +256,19 @@ public class ConcurrentAVLTreeImpl<K, N extends ConcurrentAVLTree.Node<K>> imple
     private void setBalance(N... nodes) {
         for (N node : nodes) {
             reheight(node);
-            node.setBalance(node.getRight().getHeight() - node.getLeft().getHeight());
+            node.setBalance(height(node.getRight()) - height(node.getLeft()));
         }
     }
 
     private void reheight(N node) {
         if (node != null) {
-            node.setHeight(1 + Math.max(node.getLeft().getHeight(), node.getRight().getHeight()));
+            node.setHeight(1 + Math.max(height(node.getLeft()), height(node.getRight())));
         }
+    }
+
+    private int height(N n) {
+        if (n == null)
+            return -1;
+        return n.getHeight();
     }
 }

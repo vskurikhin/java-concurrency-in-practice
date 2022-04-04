@@ -32,38 +32,8 @@ public class ConcurrentAVLTreeImplTest {
 
     @Test
     public void insert() throws InterruptedException {
-        for (int i = 0; i < 10; i++) {
-            final int j = i;
-            tree.insert(j);
-        }
-//        ExecutorService exec = Executors.newFixedThreadPool(256);
-//        long memBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-//        System.err.println("memBefore: " + memBefore);
-//        for (int i = 0; i < 8192; i++) {
-//            final int j = i;
-//            exec.execute(new Runnable() {
-//                @Override
-//                public void run() {
-//                    tree.insert(j);
-//                }
-//            });
-//        }
-//        exec.shutdown();
-//        if (exec.awaitTermination(30, TimeUnit.SECONDS)) {
-//            System.err.println("awaitTermination returned true");
-//        } else {
-//            System.err.println("awaitTermination returned false");
-//        }
-//        exec.shutdownNow();
-//        long memAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
-//        System.err.println("memAfter: " + memAfter);
-//        tree.print(Integer.MAX_VALUE);
-    }
-
-    @Test
-    public void delete() throws InterruptedException {
-        Object o = new Object();
         ExecutorService exec = Executors.newFixedThreadPool(256);
+        System.gc();
         long memBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         System.err.println("memBefore: " + memBefore);
         for (int i = 0; i < 8192; i++) {
@@ -71,7 +41,8 @@ public class ConcurrentAVLTreeImplTest {
             exec.execute(new Runnable() {
                 @Override
                 public void run() {
-                    map.put(j, o);
+                    assertTrue(tree.insert(j));
+                    assertNotNull(tree.find(j));
                 }
             });
         }
@@ -82,8 +53,48 @@ public class ConcurrentAVLTreeImplTest {
             System.err.println("awaitTermination returned false");
         }
         exec.shutdownNow();
+        exec = null;
+        System.gc();
         long memAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
         System.err.println("memAfter: " + memAfter);
+        for (int i = 0; i < 8192; i++) {
+            final int j = i;
+            assertNotNull(tree.find(j));
+        }
+    }
+
+    @Test
+    public void delete() throws InterruptedException {
+        Object o = new Object();
+        ExecutorService exec = Executors.newFixedThreadPool(256);
+        System.gc();
+        long memBefore = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        System.err.println("memBefore: " + memBefore);
+        for (int i = 0; i < 8192; i++) {
+            final int j = i;
+            exec.execute(new Runnable() {
+                @Override
+                public void run() {
+                    map.put(j, o);
+                    assertNotNull(map.get(j));
+                }
+            });
+        }
+        exec.shutdown();
+        if (exec.awaitTermination(30, TimeUnit.SECONDS)) {
+            System.err.println("awaitTermination returned true");
+        } else {
+            System.err.println("awaitTermination returned false");
+        }
+        exec.shutdownNow();
+        exec = null;
+        System.gc();
+        long memAfter = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+        System.err.println("memAfter: " + memAfter);
+        for (int i = 0; i < 8192; i++) {
+            final int j = i;
+            assertNotNull(map.get(j));
+        }
     }
 
     @Test

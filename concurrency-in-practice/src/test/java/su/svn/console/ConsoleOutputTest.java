@@ -54,8 +54,8 @@ public class ConsoleOutputTest extends TestCase {
 
     public void testMethod_toString() {
         consoleOutput = ConsoleOutput.redirect();
-        System.out.print("test");
-        assertEquals("test", consoleOutput.toString());
+        System.out.print("id");
+        assertEquals("id", consoleOutput.toString());
     }
 
     public void tearDown() throws Exception {

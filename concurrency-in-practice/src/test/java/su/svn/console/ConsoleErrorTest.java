@@ -56,8 +56,8 @@ public class ConsoleErrorTest extends TestCase {
 
     public void testMethod_toString() {
         consoleError = ConsoleError.redirect();
-        System.err.print("test");
-        assertEquals("test", consoleError.toString());
+        System.err.print("id");
+        assertEquals("id", consoleError.toString());
     }
 
     public void tearDown() throws Exception {

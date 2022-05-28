@@ -48,8 +48,8 @@ public class ConsoleStubTest extends TestCase {
 
     public void testMethod_toString() {
         consoleError = ConsoleStub.get();
-        ConsoleStub.print("test");
-        assertEquals("test", consoleError.toString());
+        ConsoleStub.print("id");
+        assertEquals("id", consoleError.toString());
     }
 
     public void tearDown() throws Exception {

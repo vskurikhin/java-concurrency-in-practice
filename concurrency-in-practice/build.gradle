@@ -71,6 +71,12 @@ dependencies {
     implementation "org.slf4j:jul-to-slf4j:$libVers.jul_to_slf4j"
     implementation "org.springframework:spring-webmvc:$libVers.springframework"
 
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+
     compileOnly "javax.servlet:javax.servlet-api:$libVers.javax_servlet_api"
 
     testImplementation 'org.assertj:assertj-core:3.22.0'

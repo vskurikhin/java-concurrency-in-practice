@@ -8,7 +8,7 @@
 
 package su.svn.utils;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class ClassSwitchMapConsumer extends ClassUnmodifiableMapImpl<Consumer<Object>> {
+public class ClassSwitchMapFunction<T> extends ClassUnmodifiableMapImpl<Function<Object, T>> {
 }

@@ -1,35 +1,35 @@
 package su.svn.utils;
 
-import lombok.Builder;
-import lombok.Value;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import su.svn.identification.Ident;
 import su.svn.identification.Identification;
 import su.svn.identification.IdentificationLong;
 
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class ClassSwitchMapConsumerTest {
 
+    AtomicReference<String> test = new AtomicReference<>();
+
     ClassMap<Consumer<Object>> switchMap = new ClassSwitchMapConsumer() {{
         put(long.class, o -> {
             long id = (long) o;
-            System.out.println("long id = " + id);
+            test.set("long " + id);
         });
-        put(Long.class, o -> {
-            System.out.println("Long id = " + o);
-        });
-        put(String.class, o -> {
-            System.out.println("String id = " + o);
-        });
+        put(Long.class, o -> test.set("Long " + o));
+        put(String.class, o -> test.set("String " + o));
     }};
 
     void switchCase(Ident record) {
-        if (record instanceof IdentificationLong r) {
+        if (record instanceof IdentificationLong) {
+            IdentificationLong r = (IdentificationLong) record;
             switchMap.get(r.idClass()).ifPresent(c -> c.accept(r.id()));
         }
-        if (record instanceof Identification r) {
+        if (record instanceof Identification) {
+            Identification<?> r = (Identification<?>) record;
             switchMap.get(r.idClass()).ifPresent(c -> c.accept(r.id()));
         }
     }
@@ -50,50 +50,10 @@ public class ClassSwitchMapConsumerTest {
     @Test
     public void test() {
         switchCase(test1);
+        Assert.assertEquals("long 1", test.get());
         switchCase(test2);
+        Assert.assertEquals("Long 2", test.get());
         switchCase(test3);
-    }
-
-    @Value
-    @Builder(toBuilder = true)
-    static class TestIdentLong implements IdentificationLong {
-
-        long id;
-
-        public long id() {
-            return id;
-        }
-    }
-
-    @Value
-    @Builder(toBuilder = true)
-    static class TestIdentBoxingLong implements Identification<Long> {
-
-        Long id;
-
-        public Long id() {
-            return id;
-        }
-
-        @Override
-        public Class<?> idClass() {
-            return Long.class;
-        }
-    }
-
-    @Value
-    @Builder(toBuilder = true)
-    static class TestIdentString implements Identification<String> {
-
-        String id;
-
-        public String id() {
-            return id;
-        }
-
-        @Override
-        public Class<?> idClass() {
-            return String.class;
-        }
+        Assert.assertEquals("String 3", test.get());
     }
 }

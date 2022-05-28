@@ -8,22 +8,28 @@
 
 package su.svn.utils;
 
+import net.jcip.annotations.GuardedBy;
+import net.jcip.annotations.ThreadSafe;
+
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class ClassMapImpl<T> implements ClassMap<T> {
-    private final Map<Class<?>, T> initializeMap;
+@ThreadSafe
+public class ClassUnmodifiableMapImpl<T> implements ClassMap<T> {
 
+    private final Map<Class<?>, T> initializeMap = new LinkedHashMap<>();
+
+    @GuardedBy("initializeMap")
     private volatile Map<Class<?>, T> unmodifiableMap;
 
-    ClassMapImpl() {
-        initializeMap = new LinkedHashMap<>();
-    }
-
     public void put(Class<?> key, T value) {
-        initializeMap.put(key, value);
+        synchronized (initializeMap) {
+            if (null == unmodifiableMap) {
+                initializeMap.put(key, value);
+            }
+        }
     }
 
     public Optional<T> get(Class<?> key) {

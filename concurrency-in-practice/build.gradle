@@ -36,8 +36,9 @@ ext.libVers = [
         jul_to_slf4j                    : '1.7.36',
         junit                           : '5.8.1',
         logback_classic                 : '1.2.10',
+        lombok                          : '1.18.24',
         org_reflections                 : '0.10.2',
-        springframework                 : '5.3.18',
+        springframework                 : '5.3.19',
         tomcat_embed_core               : '9.0.58',
 ]
 
@@ -71,11 +72,11 @@ dependencies {
     implementation "org.slf4j:jul-to-slf4j:$libVers.jul_to_slf4j"
     implementation "org.springframework:spring-webmvc:$libVers.springframework"
 
-    compileOnly 'org.projectlombok:lombok:1.18.24'
-    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    compileOnly "org.projectlombok:lombok:$libVers.lombok"
+    annotationProcessor "org.projectlombok:lombok:$libVers.lombok"
 
-    testCompileOnly 'org.projectlombok:lombok:1.18.24'
-    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testCompileOnly "org.projectlombok:lombok:$libVers.lombok"
+    testAnnotationProcessor "org.projectlombok:lombok:$libVers.lombok"
 
     compileOnly "javax.servlet:javax.servlet-api:$libVers.javax_servlet_api"
 

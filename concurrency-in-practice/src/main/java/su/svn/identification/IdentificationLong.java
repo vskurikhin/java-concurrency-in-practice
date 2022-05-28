@@ -12,11 +12,17 @@ public interface IdentificationLong extends Ident {
 
     long id();
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default String idString() {
         return Long.toString(id());
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     default Class<?> idClass() {
         return long.class;

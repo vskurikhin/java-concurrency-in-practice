@@ -12,7 +12,20 @@ import java.util.Optional;
 
 public interface ClassMap<T> {
 
+    /**
+     * Декоративный метод для добавления значения в карту по ключу.
+     *
+     * @param key ключ.
+     * @param value значение.
+     */
     void put(Class<?> key, T value);
 
+    /**
+     * Декоративный метод для получения значения в карту по ключу.
+     * Если значение есть оно обёрнуто в Optional иначе EMPTY.
+     *
+     * @param key ключ.
+     * @return значение в Optional если есть.
+     */
     Optional<T> get(Class<?> key);
 }
